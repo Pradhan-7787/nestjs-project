@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Team, TeamDocument } from './team.model';
 import { Company, CompanyDocument } from '../company-data/company.model';
+import { AuthGuardVerify } from 'src/auth0-service/auth.guard';
 
 @Controller('team-data')
 export class TeamDataController {
@@ -10,8 +11,8 @@ export class TeamDataController {
     @InjectModel(Company.name) private companyModel: Model<CompanyDocument>
   ) { }
 
-
   @Get()
+  @UseGuards(AuthGuardVerify)
   async findAll(): Promise<any> {
     const companies = await this.companyModel.find().exec();
     const teams = await this.teamModel.find().exec();
@@ -26,6 +27,7 @@ export class TeamDataController {
   }
 
   @Post('/:companyId') // Add the companyId as a path parameter
+  @UseGuards(AuthGuardVerify)
   async createTeam(
     @Body() team: Team,
     @Param('companyId') companyId: string,
